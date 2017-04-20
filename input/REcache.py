@@ -60,7 +60,7 @@ class Cache(object):
         self.videoArray = Set()
         self.videoReq = 0
 
-    def add_video_to_cache(self, v, vSize, vReq, EndpointId):
+    def add_video_to_cache(self, v, vSize, vReq):
         #only adds videos if the video's size that you want to put in the cache is not greater
         #than the remaining size in the cache. Uses the set data structure so there are no
         #duplicat videos in the cache.
@@ -76,6 +76,8 @@ class Cache(object):
             # print("remaining cache size",self.cacheTotal)
             return True
         else:
+            # print("video too big for cache", self.id, "!!")
+            # print("remaining cache size", self.cacheTotal)
             return False
 
     def return_cache_server_size(self):

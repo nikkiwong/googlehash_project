@@ -1,12 +1,12 @@
 class Endpoint(object):
-    def __init__(self, epc, dc, cLat):
+    def __init__(self, epc, dc, cLat, totVid):
         self.number_of_caches = epc
         self.dc = dc
         self.cLat = cLat
         self.latency_array = []
-        self.totLat = []
+        self.list_vidNum = [False] * totVid
         self.time_saved()
-        self.list_vidReq = [0] * len(cLat)
+        self.list_vidReq = [0] * totVid
         self.score = 0
         self.totVidReq = 0
         self.EpScore = 0
@@ -15,8 +15,8 @@ class Endpoint(object):
         videoReq = 0
         for EPcache in self.number_of_caches:
             if EPcache == cacheId:
-                videoReq += vidReq
-        self.list_vidReq[cacheId] += videoReq
+                self.list_vidNum[vidNum] = True
+                self.list_vidReq[vidNum] = vidReq
 
     def score_per_EP(self, vidReq, bestTimeSaved):
         # print("besttimesaved:", bestTimeSaved)
@@ -24,11 +24,11 @@ class Endpoint(object):
             initScore = vidReq*max(bestTimeSaved)
             self.totVidReq += vidReq
             self.score += initScore
-            # self.EpScore = self.score / self.totVidReq
+            self.EpScore = self.score / self.totVidReq
 
     def get_score_per_EP(self):
-        if self.score != 0 and self.totVidReq != 0:
-            self.EpScore = self.score / self.totVidReq
+        # if self.score != 0 and self.totVidReq != 0:
+        #     self.EpScore = self.score / self.totVidReq
         return self.EpScore
 
     def get_vidReq(self):
