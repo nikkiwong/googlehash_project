@@ -36,7 +36,9 @@ def best_time(video_ed_request, list_cache, list_endpoint):
         for i in range(0, len(list_cache)):
             if list_cache[i].get_videoMatrix()[int(key[0])]:
                 list_bestTime.append(list_endpoint[int(key[1])].get_time_saved()[i])
-        list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
+
+        #check out this function score_per_EP to see if it has something to do with the score decreasing all the time.
+        # list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
 
 
 def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_desc, list_endpoint):
@@ -56,7 +58,7 @@ def hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_s
             print("new score:", new_score)
             if max < new_score:
                 max = new_score
-                return max
+    return max
 
 
 #************************ CREATING CACHE AND ENDPOINT OBJECTS ************************************
