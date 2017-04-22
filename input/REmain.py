@@ -6,7 +6,7 @@ import time
 
 start = time.time()
 
-data = read_input.read_google("input/kittens.in")
+data = read_input.read_google("input/me_at_the_zoo.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -39,6 +39,25 @@ def best_time(video_ed_request, list_cache, list_endpoint):
         list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
 
 
+def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_desc, list_endpoint):
+    for key, value in video_ed_request.items():
+        for cache in ed_cache_list[int(key[1])]:
+            if list_cache[cache].add_video_to_cache(int(key[0]), video_size_desc[int(key[0])], int(value)):
+                list_endpoint[int(key[1])].add_video_request_per_cache(int(key[0]), int(value), int(cache))
+
+
+def hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
+    max = 0
+    for cache in range(0, number_of_caches):
+        for video in range(0, number_of_videos):
+            list_cache[cache].hill_climb(video, video_size_desc[video])
+            best_time(video_ed_request, list_cache, list_endpoint)
+            new_score = score(list_endpoint)
+            print("new score:", new_score)
+            if max < new_score:
+                max = new_score
+                return max
+
 
 #************************ CREATING CACHE AND ENDPOINT OBJECTS ************************************
 
@@ -55,73 +74,33 @@ for cache in range (0, number_of_caches):
     cache = Cache(cache, cache_size, number_of_videos)
     list_cache.append(cache)
 
-
-print("adding video")
-
 #************************ ADD VIDEO TO CACHE ************************************
 
-for key, value in video_ed_request.items():
-    # adding videos that are requested at each endpoint to the caches they are linked to
-    for cache in ed_cache_list[int(key[1])]:
-        # for video in list_cache[cache].get_videoMatrix():
-        # #if the video is NOT IN ANY of the caches
-        #     if video == False:
-        # print("video:",key[0])
-        if list_cache[cache].add_video_to_cache(int(key[0]), video_size_desc[int(key[0])], int(value)):
-            list_endpoint[int(key[1])].add_video_request_per_cache(int(key[0]), int(value), int(cache))
-        # print("videos in cache", cache, ":", list_cache[cache].get_video_in_cache_list())
-        # print("matrix  :",  list_cache[cache].get_videoMatrix())
-        # vid_req[cache] = [value]
-    # x = int(key[0]), int(key[1]), int(value)
-    # print(x)
-        # array.append((x))
-print("Finished adding video")
+print("Adding video...")
+
+add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_desc, list_endpoint)
+
+print("Finished adding video.")
 
 #************** CALCULATING FROM WHICH CACHE AN ENDPOINT SHOULD GET VIDEO REQUESTS FROM *************************
 
-
-"""calculating from the best cache the endpoint should get its video requests from"""
-for key, value in video_ed_request.items():
-    list_bestTime = []
-    for i in range(0, len(list_cache)):
-        if list_cache[i].get_videoMatrix()[int(key[0])]:
-            list_bestTime.append(list_endpoint[int(key[1])].get_time_saved()[i])
-    list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
-
-# best_time(video_ed_request, list_cache, list_endpoint)
+best_time(video_ed_request, list_cache, list_endpoint)
 
 #****************************** HILL CLIMB ALGORITHM ********************************
 
-a = score(list_endpoint)
+max = score(list_endpoint)
 
-print("original score:", a)
+print("First score:", max)
 
-# n = 0
-#
-# for cache in list_cache:
-#     for vidNum in range(0, number_of_videos):
-#         # print("")
-#         # print("cache size before:", cache.return_cache_server_size())
-#         # print("video_size_desc[vidNum]",video_size_desc[vidNum])
-#         # print("vidNum: ",vidNum)
-#         # print("")
-#         # print("matrix before", cache.get_videoMatrix())
-#         if cache.add_to_matrix(vidNum, video_size_desc[vidNum]):
-#             # print("HILL CLIMB matrix after:", list_cache[0].get_videoMatrix())
-#             # print("HILL CLIMB matrix after:", list_cache[1].get_videoMatrix())
-#             # print("HILL CLIMB matrix after:", list_cache[2].get_videoMatrix())
-#             # print("HILL CLIMB matrix after:", list_cache[3].get_videoMatrix())
-#
-#             # print("cache size after:", cache.return_cache_server_size())
-#             best_time(video_ed_request, list_cache, list_endpoint)
-#             max = score(list_endpoint)
-#             print("Hill Climb score:", max)
-#             if a>max:
-#                 max=a
-#                 # bestMatrix=list_cache
-#     n+=1
-# print("best Hill Climb score", max)
+print("Starting Hill Climb...")
 
+score = hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint)
+print("Finished Hill Climb.")
+
+if max<score:
+    max = score
+
+print("best Hill Climb score", max)
 
 #************** RANDOM GENETIC ALGORITHM *************************
 
@@ -158,7 +137,7 @@ print("original score:", a)
 #     print(cache)
 #     print("cache size:", cache.return_cache_server_size())
 #     print("cache video:", cache.get_video_in_cache_list())
-#     print("cache video:", cache.get_videoMatrix())
+# print("cache video:", list_cache[0].get_videoMatrix())
 #     print("cache video request:", cache.get_vidReq())
 # print(list_cache.get_videoMatrix())
 # for endpoint in list_endpoint:
