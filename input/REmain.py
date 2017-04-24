@@ -1,12 +1,13 @@
 import read_input
 from REcache import Cache
 from REendpoint import Endpoint
+from random import randint
 
 import time
 
 start = time.time()
 
-data = read_input.read_google("input/me_at_the_zoo.in")
+data = read_input.read_google("input/trending_today.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -31,17 +32,11 @@ def score(list_endpoints):
 
 def best_time(video_ed_request, list_cache, list_endpoint):
     """calculating from the best cache the endpoint should get its video requests from"""
-    # """if video is not in cache it calculates the endpoint score from """
     for key, value in video_ed_request.items():
         list_bestTime = []
         for i in range(0, len(list_cache)):
             if list_cache[i].get_videoMatrix()[int(key[0])]:
                 list_bestTime.append(list_endpoint[int(key[1])].get_time_saved()[i])
-        # #check out this function score_per_EP to see if it has something to do with the score decreasing all the time.
-        # print("list best time:", list_bestTime)
-        # if list_bestTime != []:
-        #     print("max best time:", max(list_bestTime))
-        #     print("Best time score: video req", int(value)," x best time ", max(list_bestTime), "=", int(value)* max(list_bestTime))
         list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
 
 
@@ -52,7 +47,7 @@ def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_d
                 list_endpoint[int(key[1])].add_video_request_per_cache(int(key[0]), int(value), int(cache))
 
 
-def hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
+def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
     maximum = 0
     for cache in range(0, number_of_caches):
         for video in range(0, number_of_videos):
@@ -63,6 +58,38 @@ def hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_s
             if maximum < new_score:
                 maximum = new_score
     return maximum
+
+def RHC_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
+    randomMax=0
+    x=0
+    for cacheNum in range(0, number_of_caches):
+        while x<1000:
+            n = randint(0, number_of_videos-1)
+            list_cache[cacheNum].random_hill_climb(n, video_size_desc[n])
+            best_time(video_ed_request, list_cache, list_endpoint)
+            new_score = score(list_endpoint)
+            if new_score>randomMax:
+                randomMax= new_score
+            x+=1
+    return randomMax
+
+# def annealing_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
+#     old_score = score(list_endpoint)
+#     T = 1.0
+#     T_min = 0.00001
+#     alpha = 0.9
+#     while T>T_min:
+#         i = 1
+#         while i<=100:
+#             for cache in range(0, number_of_caches):
+#                 for video in range(0, number_of_videos):
+#                     list_cache[cache].hill_climb(video, video_size_desc[video])
+#                     # best_time(video_ed_request, list_cache, list_endpoint)
+#                     # new_score = score(list_endpoint)
+#                     # # print("new score:", new_score)
+#                     # if maximum < new_score:
+#                     #     maximum = new_score
+#     return maximum
 
 
 #************************ CREATING CACHE AND ENDPOINT OBJECTS ************************************
@@ -100,7 +127,7 @@ print("First score:", maximum)
 
 print("Starting Hill Climb...")
 
-hillClimbScore = hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint)
+hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint)
 print("Finished Hill Climb.")
 
 if maximum<hillClimbScore:
@@ -115,7 +142,6 @@ print("best Hill Climb score", maximum)
 
 #************** RANDOM SEARCH *************************
 
-from random import randint
 randomMax=0
 x=0
 for cacheNum in range(0, number_of_caches):
@@ -126,7 +152,7 @@ for cacheNum in range(0, number_of_caches):
         randomMax = score(list_endpoint)
         if maximum<randomMax:
             maximum=randomMax
-            bestMatrix=list_cache
+            # bestMatrix=list_cache
         x+=1
 print("best Random Search score", maximum)
 
