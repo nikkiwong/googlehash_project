@@ -31,14 +31,18 @@ def score(list_endpoints):
 
 def best_time(video_ed_request, list_cache, list_endpoint):
     """calculating from the best cache the endpoint should get its video requests from"""
+    # """if video is not in cache it calculates the endpoint score from """
     for key, value in video_ed_request.items():
         list_bestTime = []
         for i in range(0, len(list_cache)):
             if list_cache[i].get_videoMatrix()[int(key[0])]:
                 list_bestTime.append(list_endpoint[int(key[1])].get_time_saved()[i])
-
-        #check out this function score_per_EP to see if it has something to do with the score decreasing all the time.
-        # list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
+        # #check out this function score_per_EP to see if it has something to do with the score decreasing all the time.
+        # print("list best time:", list_bestTime)
+        # if list_bestTime != []:
+        #     print("max best time:", max(list_bestTime))
+        #     print("Best time score: video req", int(value)," x best time ", max(list_bestTime), "=", int(value)* max(list_bestTime))
+        list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
 
 
 def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_desc, list_endpoint):
@@ -49,16 +53,16 @@ def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_d
 
 
 def hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
-    max = 0
+    maximum = 0
     for cache in range(0, number_of_caches):
         for video in range(0, number_of_videos):
             list_cache[cache].hill_climb(video, video_size_desc[video])
             best_time(video_ed_request, list_cache, list_endpoint)
             new_score = score(list_endpoint)
-            print("new score:", new_score)
-            if max < new_score:
-                max = new_score
-    return max
+            # print("new score:", new_score)
+            if maximum < new_score:
+                maximum = new_score
+    return maximum
 
 
 #************************ CREATING CACHE AND ENDPOINT OBJECTS ************************************
@@ -90,19 +94,19 @@ best_time(video_ed_request, list_cache, list_endpoint)
 
 #****************************** HILL CLIMB ALGORITHM ********************************
 
-max = score(list_endpoint)
+maximum = score(list_endpoint)
 
-print("First score:", max)
+print("First score:", maximum)
 
 print("Starting Hill Climb...")
 
-score = hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint)
+hillClimbScore = hill_climb_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint)
 print("Finished Hill Climb.")
 
-if max<score:
-    max = score
+if maximum<hillClimbScore:
+    maximum = hillClimbScore
 
-print("best Hill Climb score", max)
+print("best Hill Climb score", maximum)
 
 #************** RANDOM GENETIC ALGORITHM *************************
 
@@ -111,22 +115,20 @@ print("best Hill Climb score", max)
 
 #************** RANDOM SEARCH *************************
 
-# from random import randint
-#
-# n = 0
-# x=0
-# for cacheNum in range(0, number_of_caches):
-#     while x<50:
-#         if list_cache[cacheNum].add_to_matrix(n, video_size_desc[randint(0, number_of_videos)]):
-#             best_time(video_ed_request, list_cache, list_endpoint)
-#             max = score(list_endpoint)
-#             print("Hill Climb score:", max)
-#             if a>max:
-#                 max=a
-#                 bestMatrix=list_cache
-#         n+=1
-#         x+=1
-# print("best Random Search score", max)
+from random import randint
+randomMax=0
+x=0
+for cacheNum in range(0, number_of_caches):
+    while x<1000:
+        n = randint(0, number_of_videos-1)
+        list_cache[cacheNum].random_hill_climb(n, video_size_desc[n])
+        best_time(video_ed_request, list_cache, list_endpoint)
+        randomMax = score(list_endpoint)
+        if maximum<randomMax:
+            maximum=randomMax
+            bestMatrix=list_cache
+        x+=1
+print("best Random Search score", maximum)
 
 #************** SIMULATED ANNEALING *************************
 

@@ -24,11 +24,12 @@ class Endpoint(object):
             initScore = vidReq*max(bestTimeSaved)
             self.totVidReq += vidReq
             self.score += initScore
-            self.EpScore = self.score / self.totVidReq
+        #     self.EpScore = self.score / self.totVidReq
+        # return self.EpScore
 
     def get_score_per_EP(self):
-        # if self.score != 0 and self.totVidReq != 0:
-        #     self.EpScore = self.score / self.totVidReq
+        if self.score != 0 and self.totVidReq != 0:
+            self.EpScore = self.score / self.totVidReq
         return self.EpScore
 
     def get_vidReq(self):

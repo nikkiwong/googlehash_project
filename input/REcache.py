@@ -111,6 +111,23 @@ class Cache(object):
 
                 return True
 
+    def random_hill_climb(self, n, eachVSize):
+
+        #HILL CLIMB
+        #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
+        if self.cacheTotal-eachVSize > 0:
+            if self.vidMatrix[n] == True:
+                self.vidMatrix[n] = False
+                self.cacheTotal += eachVSize
+            else:
+                self.vidMatrix[self.addedVideo] = False
+                #reverting the last added video back to original because in hill climb you only change one!
+                self.vidMatrix[n] = True
+                self.cacheTotal -= eachVSize
+                # self.addedVideo = n
+
+
+
 
     def __repr__(self):
         return "cache" + str(self.id)
