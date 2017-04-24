@@ -7,7 +7,7 @@ import time
 
 start = time.time()
 
-data = read_input.read_google("input/trending_today.in")
+data = read_input.read_google("input/videos_worth_spreading.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -51,12 +51,12 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
     maximum = 0
     for cache in range(0, number_of_caches):
         for video in range(0, number_of_videos):
-            list_cache[cache].hill_climb(video, video_size_desc[video])
-            best_time(video_ed_request, list_cache, list_endpoint)
-            new_score = score(list_endpoint)
-            # print("new score:", new_score)
-            if maximum < new_score:
-                maximum = new_score
+            if list_cache[cache].hill_climb(video, video_size_desc[video]):
+                best_time(video_ed_request, list_cache, list_endpoint)
+                new_score = score(list_endpoint)
+                # print("new score:", new_score)
+                if maximum < new_score:
+                    maximum = new_score
     return maximum
 
 def RHC_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
@@ -142,19 +142,27 @@ print("best Hill Climb score", maximum)
 
 #************** RANDOM SEARCH *************************
 
-randomMax=0
-x=0
-for cacheNum in range(0, number_of_caches):
-    while x<1000:
-        n = randint(0, number_of_videos-1)
-        list_cache[cacheNum].random_hill_climb(n, video_size_desc[n])
-        best_time(video_ed_request, list_cache, list_endpoint)
-        randomMax = score(list_endpoint)
-        if maximum<randomMax:
-            maximum=randomMax
-            # bestMatrix=list_cache
-        x+=1
+print("Starting Random Search...")
+randomSearch = RHC_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc)
+print("Finished Random Search...")
+if maximum<randomSearch:
+    maximum = randomSearch
+
 print("best Random Search score", maximum)
+
+# randomMax=0
+# x=0
+# for cacheNum in range(0, number_of_caches):
+#     while x<1000:
+#         n = randint(0, number_of_videos-1)
+#         list_cache[cacheNum].random_hill_climb(n, video_size_desc[n])
+#         best_time(video_ed_request, list_cache, list_endpoint)
+#         randomMax = score(list_endpoint)
+#         if maximum<randomMax:
+#             maximum=randomMax
+#             # bestMatrix=list_cache
+#         x+=1
+# print("best Random Search score", maximum)
 
 #************** SIMULATED ANNEALING *************************
 
