@@ -4,6 +4,7 @@ from REendpoint import Endpoint
 from random import randint
 from numba import jit
 import time
+import copy
 
 start = time.time()
 
@@ -43,20 +44,24 @@ def best_time(video_ed_request, list_cache, list_endpoint):
         for i in range(0, len(list_cache)):
             if list_cache[i].get_videoMatrix()[int(key[0])]:
                 list_bestTime.append(list_endpoint[int(key[1])].get_time_saved()[i])
-        list_endpoint[int(key[1])].score_per_EP(int(value), list_bestTime)
+        list_endpoint[int(key[1])].score_per_EP_per_videoRequest(int(value), list_bestTime)
 
 
 @jit
 def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
     maximum = 0
+    print("JOOOOOOOOOOOOOOOOOONP")
     for cache in range(0, number_of_caches):
+        print("1")
         for video in range(0, number_of_videos):
+            print("2")
             if list_cache[cache].hill_climb(video, video_size_desc[video]):
                 best_time(video_ed_request, list_cache, list_endpoint)
                 new_score = score(list_endpoint)
-                # print("new score:", new_score)
+                print("dog:", new_score)
                 if maximum < new_score:
                     maximum = new_score
+                    print("cat", maximum)
     return maximum
 @jit
 def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
@@ -104,10 +109,11 @@ for cache in range (0, number_of_caches):
     list_cache.append(cache)
 
 #************************ ADD VIDEO TO CACHE ************************************
-originalEP = list_endpoint
-originalCache = list_cache
-randomEP = list_endpoint
-randomCache = list_cache
+originalEP = copy.deepcopy(list_endpoint)
+originalCache = copy.deepcopy(list_cache)
+randomEP = copy.deepcopy(list_endpoint)
+randomCache = copy.deepcopy(list_cache)
+
 print("Adding video...")
 
 add_video_to_cache(video_ed_request, ed_cache_list, originalCache, video_size_desc)
@@ -120,7 +126,7 @@ print("Finished adding video.")
 print("Adding video randomly...")
 
 randomMaximum = RS_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
-
+best_time(video_ed_request, randomCache, randomEP)
 print("Finished adding video randomly...")
 
 
@@ -128,24 +134,27 @@ print("Finished adding video randomly...")
 
 #seems to finish too quickly for the bigger files...?
 
-maximum = score(randomEP)
-# hillClimbScore = maximum-1
 
-print("Original score:", maximum)
+# hillClimbScore = maximum-1
+print("Original score:", originalMaximum)
 #
 print("Starting Hill Climb...")
+parents = []
 
-# while maximum > hillClimbScore:
-hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request, randomEP)
-print("Finished Hill Climb.")
+while True:
+    hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request, randomEP)
+    print("hill cklimb !!!!!!!!!!!!!!!!!!! ", hillClimbScore)
+    if originalMaximum<hillClimbScore:
+        #storing the best solutions as long as there is improvements
+        parents.append(randomEP)
+        print("new score", hillClimbScore)
+        maximum = hillClimbScore
+    else:
+        break
+print("Finished Hill Climb...")
 
-print("best Hill Climb score", hillClimbScore)
+print("best Hill Climb score", maximum)
 
-if originalMaximum<hillClimbScore:
-    maximum = hillClimbScore
-    print("New max sore:", maximum)
-else:
-    print("Original score is better:", maximum)
 
 #************** GENETIC ALGORITHM *************************
 print("")

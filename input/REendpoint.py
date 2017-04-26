@@ -18,18 +18,27 @@ class Endpoint(object):
     #             self.list_vidNum[vidNum] = True
     #             self.list_vidReq[vidNum] = vidReq
 
-    def score_per_EP(self, vidReq, bestTimeSaved):
-        # print("besttimesaved:", bestTimeSaved)
+    def score_per_EP_per_videoRequest(self, vidReq, bestTimeSaved):
         if bestTimeSaved != []:
-            initScore = vidReq*max(bestTimeSaved)
+            # print("inside score_per_EP loop")
+            initScore = max(bestTimeSaved)
+            vReq_score = vidReq*initScore
+            # print("best cache:", initScore)
+            # print("vReq_score:", vReq_score)
             self.totVidReq += vidReq
-            self.score += initScore
+            self.score += vReq_score
         #     self.EpScore = self.score / self.totVidReq
         # return self.EpScore
 
     def get_score_per_EP(self):
+        # print("")
+        # print("get score:" , self.score)
+        # print("totVidReq:", self.totVidReq)
         if self.score != 0 and self.totVidReq != 0:
             self.EpScore = self.score / self.totVidReq
+        #need to reset these back to zero for when I calculate the other algorithms otherwise it will just keep accumulating
+        self.score = 0
+        self.totVidReq = 0
         return self.EpScore
 
     def get_vidReq(self):

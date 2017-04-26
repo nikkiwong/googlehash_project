@@ -38,7 +38,7 @@ def read_google(filename):
             ep_to_dc_latency[i] = dc_latency
 
             for j in range(number_of_caches):
-                ep_to_cache_latency[i].append(ep_to_dc_latency[i]+1)
+                ep_to_cache_latency[i].append(ep_to_dc_latency[i])
 
             cache_list = []
             for j in range(number_of_cache_i):
@@ -69,9 +69,9 @@ def read_google(filename):
 
     return data
 
-
-
-data = read_google("input/sample.in")
+#
+#
+# data = read_google("input/sample.in")
 # print(data["number_of_requests"])
 # sum = 0
 # for i in data["video_ed_request"]:
@@ -83,7 +83,7 @@ data = read_google("input/sample.in")
 # print(data["video_size_desc"])
 # print("number of videos: ", data["number_of_videos"])
 # print("end point to cache latency for endpoint 0: ", data["ep_to_cache_latency"][0])
-
+#
 # for key, value in data["video_ed_request"].items():
 #     # for i in range(0, len())
 #         if '1' in key[1]:
