@@ -3,3 +3,4 @@ class Test:
         for i in cache_array:
             if i>cache_size or i<0:
                 return -1
+

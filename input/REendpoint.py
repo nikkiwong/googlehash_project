@@ -11,12 +11,12 @@ class Endpoint(object):
         self.totVidReq = 0
         self.EpScore = 0
 
-    def add_video_request_per_cache(self, vidNum, vidReq, cacheId):
-        videoReq = 0
-        for EPcache in self.number_of_caches:
-            if EPcache == cacheId:
-                self.list_vidNum[vidNum] = True
-                self.list_vidReq[vidNum] = vidReq
+    # def add_video_request_per_cache(self, vidNum, vidReq, cacheId):
+    #     videoReq = 0
+    #     for EPcache in self.number_of_caches:
+    #         if EPcache == cacheId:
+    #             self.list_vidNum[vidNum] = True
+    #             self.list_vidReq[vidNum] = vidReq
 
     def score_per_EP(self, vidReq, bestTimeSaved):
         # print("besttimesaved:", bestTimeSaved)
