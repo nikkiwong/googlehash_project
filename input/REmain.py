@@ -65,12 +65,6 @@ def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, 
         while x<10000:
             n = randint(0, number_of_videos-1)
             list_cache[cacheNum].random_search(n, video_size_desc[n])
-            best_time(video_ed_request, list_cache, list_endpoint)
-            new_score = score(list_endpoint)
-            if new_score>randomMax:
-                randomMax= new_score
-            x+=1
-    return randomMax
 
 
 #very repetitive??? should I always start from the original list or work from the "new" list that keeps getting generated??
@@ -164,22 +158,22 @@ else:
 
 print("")
 
-print("Starting random search ...")
+print("Randomly adding videos to cache ...")
 # random_Max = maximum-1
 # count = 0
 # while maximum > random_Max and maximum!=random_Max:
 #     print(count)
-random_Max = RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc)
+RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc)
     # count += 1
-print("Finished random search...")
+print("Finished random adding...")
+#
+# print("Best random search score:", random_Max)
 
-print("Best random search score:", random_Max)
-
-if maximum<random_Max:
-    maximum = random_Max
-    print("New max sore:", maximum)
-else:
-    print("Original score is better:", maximum)
+# if maximum<random_Max:
+#     maximum = random_Max
+#     print("New max sore:", maximum)
+# else:
+#     print("Original score is better:", maximum)
 
 
 #************** GENETIC ALGORITHM *************************

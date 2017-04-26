@@ -73,7 +73,7 @@ def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, 
 #very repetitive??? should I always start from the original list or work from the "new" list that keeps getting generated??
 
 @jit
-def GA_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
+def GA_algorithm(number_of_caches, number_of_videos, list_cache, bestTime, scoreEP, video_size_desc):
     GA_Max=0
     x=0
     for cacheNum in range(0, number_of_caches):
@@ -157,3 +157,17 @@ while originalMaximum > GA_score and originalMaximum!=GA_score:
 print("Finished genetic algorithm...")
 
 print("best genetic algorithm score:", GA_score)
+
+print("")
+print("Starting genetic algorithm...")
+# GA_score = originalMaximum-1
+#
+# while originalMaximum > GA_score and originalMaximum!=GA_score:
+GA_score2 = GA_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
+print("Finished genetic algorithm...")
+
+print("best genetic algorithm score:", GA_score2)
+
+#************************ TIME *************************````````````````````
+end = time.time()
+print("time taken:", end - start)
