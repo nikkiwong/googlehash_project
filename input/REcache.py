@@ -57,45 +57,43 @@ class Cache(object):
         self.size = size
         self.cacheTotal = self.size
         self.vidMatrix = [False]*vTotal
-        self.videoArray = Set()
+        self.videoArray = Set() #this cache uses the Set data structure to store videos
         self.videoReq = 0
         self.addedVideo = 0
 
     def add_video_to_cache(self, v, vSize, vReq):
-        #only adds videos if the video's size that you want to put in the cache is not greater
-        #than the remaining size in the cache. Uses the set data structure so there are no
-        #duplicat videos in the cache.
+        #only adds videos to the current cache if the video's size that you want to put in the cache is not greater
+        #than the remaining size in the cache.
         if self.cacheTotal-vSize > 0:
-            # print("")
-            # print("video:", int(v), ", video size:", vSize )
-            # print("before cache size", self.cacheTotal)
+            #Uses a Set array data structure so there are no duplicate videos in the same cache.
             if self.videoArray.add(v):
+                #if the current video is not already in this cache, add it to the cache.
                 self.cacheTotal -= vSize
+                #reduce the video size from the total cache size
+                #so we know how much space we have left for the next video requested.
                 self.vidMatrix[v] = True
-            # print("videos that have been added to the cache", self.id,":", self.videoArray.get_setArray())
-            # print("remaining cache size",self.cacheTotal)
+                #now that the video has been added, in the video matrix,
+                #add True to the position of the added video in the array vidMatrix
                 return True
         else:
-            # print("video too big for cache", self.id, "!!")
-            # print("remaining cache size", self.cacheTotal)
+            #if the cache has no space for the video then it will return false
             return False
 
     def return_cache_server_size(self):
         # returns the remaining size of the cache
-        # print(self.matrix)
         return self.cacheTotal
 
     def get_video_in_cache_list(self):
         return self.videoArray.get_setArray()
 
     def reset_cache_variables(self):
+        #this variable is used to reset the counter everytime after the score has been calculated *refer to REendpoint*
         self.addedVideo = 0
 
     def get_videoMatrix(self):
         return self.vidMatrix
 
     def hill_climb(self, n, eachVSize):
-
         #HILL CLIMB
         #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
         if self.cacheTotal-eachVSize > 0:
@@ -139,6 +137,7 @@ class Cache(object):
                 self.cacheTotal -= eachVSize
                 # self.addedVideo = n
                 return False
+
 
 
 

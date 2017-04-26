@@ -1,14 +1,14 @@
 import read_input
 from REcache import Cache
 from REendpoint import Endpoint
-from random import randint
+from random import randint, sample
 from numba import jit
 import time
 import copy
 
 start = time.time()
 
-data = read_input.read_google("input/me_at_the_zoo.in")
+data = read_input.read_google("input/videos_worth_spreading.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -24,9 +24,14 @@ video_ed_request = data["video_ed_request"]
 #************************ FUNCTIONS ************************************
 
 def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_desc):
+    #This function adds videos to the cache
     for key, value in video_ed_request.items():
+        #using the dictionary provided, I iterate through the dictionary.
+        #key[0] = video number; key[1] = endpoint number
         for cache in ed_cache_list[int(key[1])]:
+            #for each cache that is linked to the current endpoint
             list_cache[cache].add_video_to_cache(int(key[0]), video_size_desc[int(key[0])], int(value))
+            #add the current video into to the cache that is linked to the current endpoint.
 
 @jit
 def score(list_endpoints):
@@ -58,25 +63,25 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
             if list_cache[cache].hill_climb(video, video_size_desc[video]):
                 best_time(video_ed_request, list_cache, list_endpoint)
                 new_score = score(list_endpoint)
-                # print("dog:", new_score)
+                print("dog:", new_score)
                 if maximum < new_score:
                     maximum = new_score
                     parent.append(copy.deepcopy(list_cache))
-                    # print("cat", maximum)
+                    print("cat", maximum)
+    parent.sort()
+    parent = sample(range(0, len(parent)), 4)
     return maximum, parent
+
 @jit
 def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
     randomMax=0
     x=0
     for cacheNum in range(0, number_of_caches):
-        while x<(number_of_videos/2):
+        while x<(number_of_videos)*100:
             n = randint(0, number_of_videos-1)
             list_cache[cacheNum].random_search(n, video_size_desc[n])
             x+=1
     return randomMax
-
-
-#very repetitive??? should I always start from the original list or work from the "new" list that keeps getting generated??
 
 @jit
 def GA_algorithm(number_of_caches, number_of_videos, list_cache, bestTime, scoreEP, video_size_desc):
@@ -91,11 +96,35 @@ def GA_algorithm(number_of_caches, number_of_videos, list_cache, bestTime, score
                 best_time(video_ed_request, list_cache, list_endpoint)
                 new_score = score(list_endpoint)
                 if new_score>GA_Max:
-                    # print("inside GA algo", GA_Max)
+                    print("inside GA algo", GA_Max)
                     GA_Max= new_score
-                    # print("inside GA algo", GA_Max)
+                    print("inside GA algo", GA_Max)
             x+=1
     return GA_Max
+
+@jit
+def annealing_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
+    old_score = score(list_endpoint)
+    T = 1.0
+    T_min = 0.00001
+    alpha = 0.9
+    while T>T_min:
+        i = 1
+        while i<=100:
+            for cache in range(0, number_of_caches):
+                for video in range(0, number_of_videos):
+                    list_cache[cache].genetic_algorithm(video, video_size_desc[video])
+                    #using the genetic algorithm as it changes only one video at a time
+                    #difference here is that the videos here will be put in at random.
+
+                    # best_time(video_ed_request, list_cache, list_endpoint)
+                    # new_score = score(list_endpoint)
+                    # # print("new score:", new_score)
+                    # if maximum < new_score:
+                    #     maximum = new_score
+    return maximum
+
+
 
 #************************ CREATING CACHE AND ENDPOINT OBJECTS ************************************
 
@@ -144,21 +173,30 @@ print("Finished adding video randomly...")
 # hillClimbScore = maximum-1
 print("Original score:", originalMaximum)
 print("Random search:", randomMaximum)
+
+# if originalMaximum > randomMaximum:
+#     cache_list1 = originalCache
+#     EP_list1 = originalEP
+#     currentTopScore = originalMaximum
+# else:
+cache_list1 = randomCache
+EP_list1 = randomEP
+currentTopScore = randomMaximum
+
 print("Starting Hill Climb...")
 parents = []
 
-while True:
-    hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request, randomEP)
-    if originalMaximum<hillClimbScore[0]:
-        #storing the best solutions as long as there is improvements
-        parents.append(hillClimbScore[1])
-        print("new score", hillClimbScore[0])
-        randomMaximum = hillClimbScore[0]
-    else:
-        break
+
+hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, cache_list1, video_size_desc, video_ed_request, EP_list1)
+if originalMaximum<hillClimbScore[0]:
+    #storing the best solutions as long as there is improvements
+    parents += hillClimbScore[1]
+    print("new score", hillClimbScore[0])
+    randomMaximum = hillClimbScore[0]
+
 print("Finished Hill Climb...")
 
-print("best Hill Climb score", randomMaximum)
+print("best Hill Climb score", currentTopScore)
 
 print("Number of good hill climb cache list:", len(parents))
 
@@ -166,18 +204,21 @@ print("Number of good hill climb cache list:", len(parents))
 print("")
 print("Starting genetic algorithm...")
 count=0
+entering = 1
 while count<20:
-    GA_score = GA_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
-    if originalMaximum < GA_score and originalMaximum != GA_score:
+    GA_score = GA_algorithm(number_of_caches, number_of_videos, cache_list1, EP_list1, video_ed_request, video_size_desc)
+    if originalMaximum <= GA_score:
         #want to keep the cache matrices that give scores higher than the original cache list.
-        parents.append(copy.deepcopy(randomCache))
+        parents.append(copy.deepcopy(cache_list1))
         #storing the best 20 cache lists.
+        print("adding to list:", entering)
+        entering+=1
         count+=1
         print("best genetic algorithm score:", GA_score)
 
 print("Finished genetic algorithm...")
 
-# print("best genetic algorithm score:", GA_score)
+print("Number of good cache list:", len(parents))
 
 #************************ TIME *************************````````````````````
 end = time.time()
