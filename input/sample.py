@@ -50,25 +50,26 @@ def best_time(video_ed_request, list_cache, list_endpoint):
 @jit
 def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
     maximum = 0
-    print("JOOOOOOOOOOOOOOOOOONP")
+    parent = []
     for cache in range(0, number_of_caches):
-        print("1")
+        # print("1")
         for video in range(0, number_of_videos):
-            print("2")
+            # print("2")
             if list_cache[cache].hill_climb(video, video_size_desc[video]):
                 best_time(video_ed_request, list_cache, list_endpoint)
                 new_score = score(list_endpoint)
-                print("dog:", new_score)
+                # print("dog:", new_score)
                 if maximum < new_score:
                     maximum = new_score
-                    print("cat", maximum)
-    return maximum
+                    parent.append(copy.deepcopy(list_cache))
+                    # print("cat", maximum)
+    return maximum, parent
 @jit
 def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
     randomMax=0
     x=0
     for cacheNum in range(0, number_of_caches):
-        while x<(number_of_videos*1000):
+        while x<(number_of_videos/2):
             n = randint(0, number_of_videos-1)
             list_cache[cacheNum].random_search(n, video_size_desc[n])
             x+=1
@@ -84,11 +85,15 @@ def GA_algorithm(number_of_caches, number_of_videos, list_cache, bestTime, score
     for cacheNum in range(0, number_of_caches):
         while x<1000:
             n = randint(0, number_of_videos-1)
-            list_cache[cacheNum].genetic_algorithm(n, video_size_desc[n])
-            best_time(video_ed_request, list_cache, list_endpoint)
-            new_score = score(list_endpoint)
-            if new_score>GA_Max:
-                GA_Max= new_score
+            # print("n = ",n)
+            if list_cache[cacheNum].genetic_algorithm(n, video_size_desc[n]):
+                # print("I'm IN!")
+                best_time(video_ed_request, list_cache, list_endpoint)
+                new_score = score(list_endpoint)
+                if new_score>GA_Max:
+                    # print("inside GA algo", GA_Max)
+                    GA_Max= new_score
+                    # print("inside GA algo", GA_Max)
             x+=1
     return GA_Max
 
@@ -125,8 +130,9 @@ print("Finished adding video.")
 
 print("Adding video randomly...")
 
-randomMaximum = RS_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
+RS_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
 best_time(video_ed_request, randomCache, randomEP)
+randomMaximum = score(randomEP)
 print("Finished adding video randomly...")
 
 
@@ -137,45 +143,41 @@ print("Finished adding video randomly...")
 
 # hillClimbScore = maximum-1
 print("Original score:", originalMaximum)
-#
+print("Random search:", randomMaximum)
 print("Starting Hill Climb...")
 parents = []
 
 while True:
     hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request, randomEP)
-    print("hill cklimb !!!!!!!!!!!!!!!!!!! ", hillClimbScore)
-    if originalMaximum<hillClimbScore:
+    if originalMaximum<hillClimbScore[0]:
         #storing the best solutions as long as there is improvements
-        parents.append(randomEP)
-        print("new score", hillClimbScore)
-        maximum = hillClimbScore
+        parents.append(hillClimbScore[1])
+        print("new score", hillClimbScore[0])
+        randomMaximum = hillClimbScore[0]
     else:
         break
 print("Finished Hill Climb...")
 
-print("best Hill Climb score", maximum)
+print("best Hill Climb score", randomMaximum)
 
+print("Number of good hill climb cache list:", len(parents))
 
 #************** GENETIC ALGORITHM *************************
 print("")
 print("Starting genetic algorithm...")
-GA_score = originalMaximum-1
-
-while originalMaximum > GA_score and originalMaximum!=GA_score:
+count=0
+while count<20:
     GA_score = GA_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
+    if originalMaximum < GA_score and originalMaximum != GA_score:
+        #want to keep the cache matrices that give scores higher than the original cache list.
+        parents.append(copy.deepcopy(randomCache))
+        #storing the best 20 cache lists.
+        count+=1
+        print("best genetic algorithm score:", GA_score)
+
 print("Finished genetic algorithm...")
 
-print("best genetic algorithm score:", GA_score)
-
-print("")
-print("Starting genetic algorithm...")
-# GA_score = originalMaximum-1
-#
-# while originalMaximum > GA_score and originalMaximum!=GA_score:
-GA_score2 = GA_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
-print("Finished genetic algorithm...")
-
-print("best genetic algorithm score:", GA_score2)
+# print("best genetic algorithm score:", GA_score)
 
 #************************ TIME *************************````````````````````
 end = time.time()

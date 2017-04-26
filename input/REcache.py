@@ -88,6 +88,9 @@ class Cache(object):
     def get_video_in_cache_list(self):
         return self.videoArray.get_setArray()
 
+    def reset_cache_variables(self):
+        self.addedVideo = 0
+
     def get_videoMatrix(self):
         return self.vidMatrix
 
@@ -124,16 +127,18 @@ class Cache(object):
 
         #HILL CLIMB
         #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
-        if self.cacheTotal-eachVSize > 0:
-            if self.vidMatrix[n] == True:
-                self.vidMatrix[n] = False
-                self.cacheTotal += eachVSize
-            else:
-                self.vidMatrix[self.addedVideo] = False
+        if self.vidMatrix[n] == True:
+            self.vidMatrix[n] = False
+            self.cacheTotal += eachVSize
+            return True
+        else:
+            if self.cacheTotal - eachVSize > 0:
+                # self.vidMatrix[self.addedVideo] = False
                 #reverting the last added video back to original because in hill climb you only change one!
                 self.vidMatrix[n] = True
                 self.cacheTotal -= eachVSize
                 # self.addedVideo = n
+                return False
 
 
 

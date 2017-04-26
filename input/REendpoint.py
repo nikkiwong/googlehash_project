@@ -1,3 +1,5 @@
+from REcache import Cache
+
 class Endpoint(object):
     def __init__(self, epc, dc, cLat, totVid):
         self.number_of_caches = epc
@@ -39,6 +41,7 @@ class Endpoint(object):
         #need to reset these back to zero for when I calculate the other algorithms otherwise it will just keep accumulating
         self.score = 0
         self.totVidReq = 0
+        Cache.reset_cache_variables(self)
         return self.EpScore
 
     def get_vidReq(self):
