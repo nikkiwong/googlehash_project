@@ -56,6 +56,8 @@ def best_time(video_ed_request, list_cache, list_endpoint):
 def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc, video_ed_request, list_endpoint):
     maximum = 0
     parent = []
+    randomSelection = []
+
     for cache in range(0, number_of_caches):
         # print("1")
         for video in range(0, number_of_videos):
@@ -63,16 +65,19 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
             if list_cache[cache].hill_climb(video, video_size_desc[video]):
                 best_time(video_ed_request, list_cache, list_endpoint)
                 new_score = score(list_endpoint)
-                print("dog:", new_score)
+                # print("dog:", new_score)
                 if maximum < new_score:
                     maximum = new_score
                     parent.append(copy.deepcopy(list_cache))
-                    print("cat", maximum)
+                    # print("cat", maximum)
 
-    parent = sample(range(len(parent)//2, len(parent)), 4)
+    parent_index = sample(range(len(parent)//2, len(parent)), 4)
+    for i in parent_index:
+        #storing only the cache list that is at the index randomly chosen from above.
+        randomSelection.append(parent[i])
     #from the list of best cache list (matrices) I will pick a random 4 from the last 50% of the list
     #because the best lists are added to the end of parent.
-    return maximum, parent
+    return maximum, randomSelection
 
 @jit
 def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
@@ -90,6 +95,8 @@ def mutation_algorithm(number_of_caches, number_of_videos, list_cache, bestTime,
     mutate_Max=0
     x=0
     parents = []
+    randomSelection =[]
+
     for cacheNum in range(0, number_of_caches):
         while x<1000:
             n = randint(0, number_of_videos-1)
@@ -98,19 +105,54 @@ def mutation_algorithm(number_of_caches, number_of_videos, list_cache, bestTime,
                 # print("I'm IN!")
                 best_time(video_ed_request, list_cache, list_endpoint)
                 new_score = score(list_endpoint)
-                if n%10==0 and new_score<mutate_Max:
+                if n%2==0 and new_score<mutate_Max:
                     #storing a random cache list if the random number generated (n)
-                    #is divisible by 10. Implementing the simulated annealing here
+                    #is divisible by 2. Implementing the simulated annealing here
                     #by taking cache list that is not the best solution.
                     parents.append(copy.deepcopy(list_cache))
+                    # for parent in parents:
+                        # print("parents:", parent)
                 if new_score>mutate_Max:
                     # print("inside GA algo", GA_Max)
                     mutate_Max= new_score
                     # print("inside GA algo", GA_Max)
             x+=1
-    parents = sample(range(len(parents) // 2, len(parents)), 4)
-    return mutate_Max, parents
+    # print("PARENTS",parents)
+    parent_index = sample(range(len(parents)//2, len(parents)), 4)
+    for i in parent_index:
+        randomSelection.append(parents[i])
+    return mutate_Max, randomSelection
 
+def evolution_time(parents):
+    children = []
+    while len(children) < len(parents):
+        # making 20 children, generated from a random 20 selection of parents
+        A = randint(0, len(parents) - 1)
+        B = randint(0, len(parents) - 1)
+        if A != B:
+            parent_A = parents[A]
+            parent_B = parents[B]
+            half = len(parent_A) // 2
+            child = parent_A[:half] + parent_B[half:]
+            children.append(child)
+            #so we have the same amount of children compared to parents
+    return children
+
+@jit
+def best_children(children, video_ed_request, list_endpoint):
+    best_new_score = []
+    new_children = []
+    for child in children:
+        best_time(video_ed_request, child, list_endpoint)
+        child_score = score(list_endpoint)
+        # print("evolved child score: ", child_score)
+        if child_score > max(mutation):
+            best_new_score.append(child_score)
+            new_children.append(child)
+    if best_new_score == 0:
+        return False
+    else:
+        return True, new_children, best_new_score
 
 #************************ CREATING CACHE AND ENDPOINT OBJECTS ************************************
 
@@ -179,25 +221,89 @@ print("best Hill Climb score", randomMaximum)
 print("Number of good hill climb cache list:", len(parents))
 
 #************** GENETIC ALGORITHM *************************
+
+# --- Part 1: Mutation ---
 print("")
-print("Starting genetic algorithm...")
+print("Starting mutation algorithm...")
 count=0
 entering = 1
+mutation = []
 while count<12:
     mutation_score = mutation_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
     if originalMaximum <= mutation_score[0]:
         #want to keep the cache matrices that give scores higher than the original cache list.
         parents.append(copy.deepcopy(randomCache))
+        mutation.append(mutation_score[0])
         #storing the best 20 cache lists.
         # print("COUNTCOUNT",count)
         # print("adding to list:", entering)
         # entering+=1
-        print("best mutation algorithm score:", mutation_score[0])
+        # print("best mutation algorithm score:", mutation_score[0])
         count += 1
+        # print("mutation score:", mutation_score[1])
 parents+=mutation_score[1]
 print("Finished mutation algorithm...")
+print("best mutation algorithm score:", max(mutation))
 
-print("Number of in parent cache list:", len(parents))
+# --- Part 2: Evolution ---
+print("Time to evolve!")
+children = evolution_time(parents)
+print("Evolution complete")
+best_score = []
+evolutionScore = best_children(children, video_ed_request, randomEP)
+if evolutionScore:
+    best_score += evolutionScore[2]
+    print("Awesome! We have some children with better score than the parent!")
+    print("Let's see if we can generate an even better generation!")
+    print("Best score from the children:", max(best_score))
+else:
+    print("Nope... no good children this time round! Lets make more!")
+
+generation = 0
+best_generations = []
+best_score = []
+while generation<5:
+    # we are generating new children using the previous generations children (up to 5 generations)
+    #Let the work of evolution in generations begin
+    # print(len(children))
+    children = evolution_time(children)
+    child = best_children(children, video_ed_request, randomEP)
+    if child:
+        best_score += child[2]
+    generation+=1
+
+if best_score!=[]:
+    print("The best overall solution from the genetic algorithm:", max(best_score))
+else:
+    print("Genetic algorithm for 5 generations didn't provide a better solution compared to the solution produced by the parent." )
+
+#****************************** EVALUATING GENETIC ALGORITHM PARAMETERS *******************************
+
+#if there are no better solutions from the generation of children, then lets mutate them!
+x=0
+print("")
+print("Let's try mutating the children")
+
+while x < 20:
+    #mutating 20 generation of children
+    for child in children:
+        mutate_children = mutation_algorithm(number_of_caches, number_of_videos, child, randomEP, video_ed_request,
+                                        video_size_desc)
+        # print("mutate children",mutate_children[0])
+        if mutate_children[0]>max(best_score):
+            # print(x)
+            best_generations.append(child)
+            best_score.append(mutate_children[0])
+            # print("Better than parent mutation:", mutate_children[0])
+    x+=1
+
+if best_score!=[]:
+    print("After trying mutating the children, the best overall score from genetic algorithm:",max(best_score))
+else:
+    print("Mutating the children for 20 generations didn't provide a better solution compared to the solution produced by the parent." )
+    print("Parent score:", max(mutation))
+
+
 
 #************************ TIME *************************````````````````````
 end = time.time()
