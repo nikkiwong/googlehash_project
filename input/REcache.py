@@ -98,6 +98,9 @@ class Cache(object):
                 self.addedVideo = n
                 return True
 
+    def get_cache_size(self):
+        return self.cacheTotal
+
     def random_search(self, n, eachVSize):
         #RANDOM SEARCH
         #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
@@ -111,11 +114,12 @@ class Cache(object):
         #HILL CLIMB
         #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
         if self.vidMatrix[n] == True:
+            #just to randomize it, only change true to false if the video number is divisible by 3
             self.vidMatrix[n] = False
             self.cacheTotal += eachVSize
-            return True
+            return False
         else:
             if self.cacheTotal - eachVSize > 0:
                 self.vidMatrix[n] = True
                 self.cacheTotal -= eachVSize
-                return False
+                return True

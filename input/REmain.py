@@ -8,7 +8,7 @@ import copy
 
 start = time.time()
 
-data = read_input.read_google("input/videos_worth_spreading.in")
+data = read_input.read_google("input/me_at_the_zoo.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -111,7 +111,7 @@ def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, 
 
 
 @jit
-def mutation_algorithm(number_of_caches, number_of_videos, list_cache, bestTime, scoreEP, video_size_desc):
+def mutation_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
     """this function generates mutations in each cache at a time"""
     mutate_Max = 0
     x = 0
@@ -223,23 +223,23 @@ print("Original score before using any algorithms:", originalMaximum)
 print("Random search (i.e. completely random addition of videos) before using any algorithms:", randomMaximum)
 # ****************************** HILL CLIMB ALGORITHM ********************************
 
-print("Starting Hill Climb...")
+# print("Starting Hill Climb...")
 parents = []
-
-hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request,
-                              randomEP)
-if originalMaximum < hillClimbScore[0]:
-    print("new score", hillClimbScore[0])
-    randomMaximum = hillClimbScore[0]
-
-# storing the local best solutions
-parents += hillClimbScore[1]
-
-print("Finished Hill Climb...")
-
-print("best Hill Climb score", randomMaximum)
-
-print("Number of good hill climb cache list:", len(parents))
+#
+# hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request,
+#                               randomEP)
+# if originalMaximum < hillClimbScore[0]:
+#     print("new score", hillClimbScore[0])
+#     randomMaximum = hillClimbScore[0]
+#
+# # storing the local best solutions
+# parents += hillClimbScore[1]
+#
+# print("Finished Hill Climb...")
+#
+# print("best Hill Climb score", randomMaximum)
+#
+# print("Number of good hill climb cache list:", len(parents))
 
 # ************** GENETIC ALGORITHM *************************
 
