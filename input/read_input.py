@@ -88,4 +88,11 @@ def read_google(filename):
 #     # for i in range(0, len())
 #         if '1' in key[1]:
 #             print(key[0], value)
-
+# a,b,c,d,e,f,g,h,i,j,k,l,= 1,2,3,4,5,12,6,7,8,9,10,11
+# list = [[a,b,c], [d,e,f],[g,h,i],[j,k,l]]
+# print(list[0])
+# d = {i:list[i] for i in range(len(list))}
+# print(d)
+#
+# print({i : chr(65+i) for i in range(4)})
+#

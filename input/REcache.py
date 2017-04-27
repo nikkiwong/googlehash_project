@@ -121,7 +121,7 @@ class Cache(object):
                 self.cacheTotal -= eachVSize
                 # self.addedVideo = n
 
-    def genetic_algorithm(self, n, eachVSize):
+    def mutate_solution(self, n, eachVSize):
 
         #HILL CLIMB
         #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache

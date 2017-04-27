@@ -7,3 +7,4 @@ class Test:
             if i>cache_size or i<0:
                 return -1
 
+
