@@ -27,7 +27,6 @@ def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_d
     #This function adds videos to the cache
     for key, value in video_ed_request.items():
         #using the dictionary provided, I iterate through the dictionary.
-        #key[0] = video number; key[1] = endpoint number
         for cache in ed_cache_list[int(key[1])]:
             #for each cache that is linked to the current endpoint
             list_cache[cache].add_video_to_cache(int(key[0]), video_size_desc[int(key[0])], int(value))
@@ -59,9 +58,8 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
     randomSelection = []
 
     for cache in range(0, number_of_caches):
-        # print("1")
         for video in range(0, number_of_videos):
-            # print("2")
+
             if list_cache[cache].hill_climb(video, video_size_desc[video]):
                 best_time(video_ed_request, list_cache, list_endpoint)
                 new_score = score(list_endpoint)
@@ -149,7 +147,7 @@ def best_children(children, video_ed_request, list_endpoint):
         if child_score > max(mutation):
             best_new_score.append(child_score)
             new_children.append(child)
-    if best_new_score == 0:
+    if best_new_score == []:
         return False
     else:
         return True, new_children, best_new_score
@@ -161,13 +159,13 @@ list_cache = []
 
 for endpoint in range(0, number_of_endpoints):
     # puts all the endpoint objects into a list for easy access
-    endpoint = Endpoint(ed_cache_list[endpoint], ep_to_dc_latency[endpoint], ep_to_cache_latency[endpoint], number_of_videos)
+    endpoint = Endpoint(ep_to_dc_latency[endpoint], ep_to_cache_latency[endpoint])
     list_endpoint.append(endpoint)
 
 
 for cache in range (0, number_of_caches):
     #creating cache objects
-    cache = Cache(cache, cache_size, number_of_videos)
+    cache = Cache(cache_size, number_of_videos)
     list_cache.append(cache)
 
 #************************ ADD VIDEO TO CACHE ************************************
@@ -290,14 +288,14 @@ while x < 20:
         mutate_children = mutation_algorithm(number_of_caches, number_of_videos, child, randomEP, video_ed_request,
                                         video_size_desc)
         # print("mutate children",mutate_children[0])
-        if mutate_children[0]>max(best_score):
+        if mutate_children[0]>max(mutation):
             # print(x)
             best_generations.append(child)
             best_score.append(mutate_children[0])
             # print("Better than parent mutation:", mutate_children[0])
     x+=1
 
-if best_score!=[]:
+if max(best_score)>max(mutation):
     print("After trying mutating the children, the best overall score from genetic algorithm:",max(best_score))
 else:
     print("Mutating the children for 20 generations didn't provide a better solution compared to the solution produced by the parent." )

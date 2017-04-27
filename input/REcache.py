@@ -52,13 +52,10 @@ class Set:
 
 class Cache(object):
 
-    def __init__(self, id, size, vTotal):
-        self.id = id
-        self.size = size
-        self.cacheTotal = self.size
+    def __init__(self, size, vTotal):
+        self.cacheTotal = size
         self.vidMatrix = [False]*vTotal
         self.videoArray = Set() #this cache uses the Set data structure to store videos
-        self.videoReq = 0
         self.addedVideo = 0
 
     def add_video_to_cache(self, v, vSize, vReq):
@@ -79,13 +76,6 @@ class Cache(object):
             #if the cache has no space for the video then it will return false
             return False
 
-    def return_cache_server_size(self):
-        # returns the remaining size of the cache
-        return self.cacheTotal
-
-    def get_video_in_cache_list(self):
-        return self.videoArray.get_setArray()
-
     def reset_cache_variables(self):
         #this variable is used to reset the counter everytime after the score has been calculated *refer to REendpoint*
         self.addedVideo = 0
@@ -97,7 +87,6 @@ class Cache(object):
         #HILL CLIMB
         #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
         if self.cacheTotal-eachVSize > 0:
-            # print("n", n)
             if self.vidMatrix[n] == True:
                 return False
             else:
@@ -107,7 +96,6 @@ class Cache(object):
                 self.vidMatrix[n] = True
                 self.cacheTotal -= eachVSize
                 self.addedVideo = n
-
                 return True
 
     def random_search(self, n, eachVSize):
@@ -115,11 +103,8 @@ class Cache(object):
         #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
         if self.cacheTotal-eachVSize > 0:
             if self.vidMatrix[n] != True:
-                # self.vidMatrix[self.addedVideo] = False
-                #reverting the last added video back to original because in hill climb you only change one!
                 self.vidMatrix[n] = True
                 self.cacheTotal -= eachVSize
-                # self.addedVideo = n
 
     def mutate_solution(self, n, eachVSize):
 
@@ -131,16 +116,6 @@ class Cache(object):
             return True
         else:
             if self.cacheTotal - eachVSize > 0:
-                # self.vidMatrix[self.addedVideo] = False
-                #reverting the last added video back to original because in hill climb you only change one!
                 self.vidMatrix[n] = True
                 self.cacheTotal -= eachVSize
-                # self.addedVideo = n
                 return False
-
-
-
-
-
-    def __repr__(self):
-        return "cache" + str(self.id)
