@@ -117,11 +117,13 @@ def mutation_algorithm(number_of_caches, number_of_videos, list_cache, list_endp
     x = 0
     parents = []
     # while x < 10:
-    cacheIndex = sample(range(0, number_of_caches), number_of_caches)
+    cacheIndex = sample(range(0, number_of_caches), number_of_caches//3)
+    print("cache index",cacheIndex)
     #using this so that there are no duplicate random selection of caches
     for cacheNum in cacheIndex:
     #iterates through the caches randomly adding a random video for that random cache selected
     #repeats this process 10 times
+        print("cache index number", cacheNum)
         n = randint(0, number_of_videos - 1)
         # print("n:",n)
         #chose random video number from 0 to the number of videos that are give from the file.
@@ -143,7 +145,8 @@ def mutation_algorithm(number_of_caches, number_of_videos, list_cache, list_endp
 def evolution_time(parents):
     """this function evolves the solutions, from parent to child, create a new generation of cache lists"""
     children = []
-    while len(children) < len(parents):
+    print("parents inside evolution algorithm! ",len(parents))
+    while len(children) <= len(parents):
         # making the same number of children as there are parents
         A = randint(0, len(parents) - 1)
         B = randint(0, len(parents) - 1)
@@ -152,6 +155,7 @@ def evolution_time(parents):
             parent_A = parents[A]
             parent_B = parents[B]
             half = len(parent_A) // 2
+            print("HALF! ", half)
             child = parent_A[:half] + parent_B[half:]
             #the child is created using half of parent A and half of parent B
             children.append(child)
@@ -265,8 +269,14 @@ if randomMaximum <= mutation_score[0]:
 parents += mutation_score[1]
 
 # --- Part 2: Evolution ---
-print("startin evolution")
-children = evolution_time(parents)
+print("starting evolution")
+parents_index = sample(range(0, len(parents)), len(parents)//2)
+print("parents index",parents_index)
+
+randomParents = []
+for i in parents_index:
+    randomParents.append(parents[i])
+children = evolution_time(randomParents)
 
 evolutionScore = best_children(children, video_ed_request, randomEP)
 if evolutionScore:
@@ -282,6 +292,7 @@ best_generations = []
 
 #
 # choose half the list of children to evolve
+print("evolving children now...")
 children = evolution_time(children)
 child = best_children(children, video_ed_request, randomEP)
 if child:
@@ -294,6 +305,7 @@ print("Starting mutation of children")
 child_index = sample(range(0, len(children)), 4)
 #choose 4 random lists of these children lists to mutate
 for i in child_index:
+    print("i",i)
     mutate_children = mutation_algorithm(number_of_caches, number_of_videos, children[i], randomEP, video_ed_request,
                                          video_size_desc)
     # print("mutate children",mutate_children[0])
@@ -301,6 +313,7 @@ if mutate_children[0] > max(mutation):
     # print(x)
     best_generations.append(child)
     best_score.append(mutate_children[0])
+print("Calculating score now ...")
 
 best_score += mutation
 

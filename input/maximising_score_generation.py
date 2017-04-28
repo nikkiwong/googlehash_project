@@ -231,24 +231,24 @@ print("Original score before using any algorithms:", originalMaximum)
 print("Random search (i.e. completely random addition of videos) before using any algorithms:", randomMaximum)
 # ****************************** HILL CLIMB ALGORITHM ********************************
 
-# print("Starting Hill Climb...")
+print("Starting Hill Climb...")
 parents = []
 
-# #computing the hill climb algorithm on the cache lists that had videos randomly put in
-# hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request,
-#                               randomEP)
-# if originalMaximum < hillClimbScore[0]:
-#     print("new score", hillClimbScore[0])
-#     randomMaximum = hillClimbScore[0]
-#
-# # storing the local best solutions
-# parents += hillClimbScore[1]
-#
-# print("Finished Hill Climb...")
-#
-# print("best Hill Climb score", randomMaximum)
-#
-# print("Number of good hill climb cache list:", len(parents))
+#computing the hill climb algorithm on the cache lists that had videos randomly put in
+hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request,
+                              randomEP)
+if originalMaximum < hillClimbScore[0]:
+    print("new score", hillClimbScore[0])
+    randomMaximum = hillClimbScore[0]
+
+# storing the local best solutions
+parents += hillClimbScore[1]
+
+print("Finished Hill Climb...")
+
+print("best Hill Climb score", randomMaximum)
+
+print("Number of good hill climb cache list:", len(parents))
 
 # ************** GENETIC ALGORITHM *************************
 
