@@ -8,7 +8,7 @@ import copy
 
 start = time.time()
 
-data = read_input.read_google("input/me_at_the_zoo.in")
+data = read_input.read_google("input/videos_worth_spreading.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -138,16 +138,13 @@ def mutation_algorithm(number_of_caches, number_of_videos, list_cache, list_endp
                 mutate_Max = new_score
                 # print("MUTATED SCORE!!!!!!!!!:", mutate_Max)
 
-        # x += 1
     return mutate_Max, parents
 
 def evolution_time(parents):
     """this function evolves the solutions, from parent to child, create a new generation of cache lists"""
     children = []
-    # count = len(parents)
-    # print(len(parents))
     while len(children) < len(parents):
-        # making 20 children, generated from a random 20 selection of parents
+        # making the same number of children as there are parents
         A = randint(0, len(parents) - 1)
         B = randint(0, len(parents) - 1)
         if A != B:
@@ -214,18 +211,19 @@ print("Adding video...")
 add_video_to_cache(video_ed_request, ed_cache_list, originalCache, video_size_desc)
 best_time(video_ed_request, originalCache, originalEP)
 originalMaximum = score(originalEP)
-print("")
+# print("")
 print("Finished adding video.")
-
+#
 print("Adding video randomly...")
 #adding videos to all the caches at completely random and calculating the score
 RS_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
 best_time(video_ed_request, randomCache, randomEP)
 randomMaximum = score(randomEP)
-print("Finished adding video randomly...")
 
-print("Original score before using any algorithms:", originalMaximum)
-print("Random search (i.e. completely random addition of videos) before using any algorithms:", randomMaximum)
+best_score = []
+best_score.append(originalMaximum)
+best_score.append(randomMaximum)
+
 # ****************************** HILL CLIMB ALGORITHM ********************************
 
 # print("Starting Hill Climb...")
@@ -250,8 +248,7 @@ parents = []
 # ************** GENETIC ALGORITHM *************************
 
 # --- Part 1: Mutation ---
-print("")
-print("Starting mutation algorithm...")
+print("Starting mutation")
 count = 0
 entering = 1
 mutation = []
@@ -266,51 +263,38 @@ if randomMaximum <= mutation_score[0]:
 
         # print("mutation score:", mutation_score[1])
 parents += mutation_score[1]
-print("Finished mutation algorithm...")
-print("best mutation algorithm score:", max(mutation))
 
 # --- Part 2: Evolution ---
-print("Time to evolve!")
+print("startin evolution")
 children = evolution_time(parents)
-print("Evolution complete")
-best_score = []
+
 evolutionScore = best_children(children, video_ed_request, randomEP)
 if evolutionScore:
     best_score += evolutionScore[2]
-    print("Awesome! We have some children with better score than the parent!")
-    print("Let's see if we can generate an even better generation!")
-    print("Best score from the children:", max(best_score))
-else:
-    print("Nope... no good children this time round! Lets make more!")
+
 
 generation = 0
 best_generations = []
-best_score = []
 
     # we are generating new children using the previous generations children (up to 5 generations)
     # Let the work of evolution in generations begin
     # print(len(children))
+
+#
+# choose half the list of children to evolve
 children = evolution_time(children)
 child = best_children(children, video_ed_request, randomEP)
 if child:
     best_score += child[2]
 
 
-if best_score != []:
-    print("The best overall solution from the genetic algorithm:", max(best_score))
-else:
-    print(
-        "Genetic algorithm for 5 generations didn't provide a better solution compared to the solution produced by the parent.")
-
 # ****************************** EVALUATING GENETIC ALGORITHM PARAMETERS *******************************
-
-# if there are no better solutions from the generation of children, then lets mutate them!
-x = 0
-print("")
-print("Let's try mutating the children...")
-
-for child in children:
-    mutate_children = mutation_algorithm(number_of_caches, number_of_videos, child, randomEP, video_ed_request,
+print("Starting mutation of children")
+# if there are no better solutions from the generation of children, then lets mutate some of them!
+child_index = sample(range(0, len(children)), 4)
+#choose 4 random lists of these children lists to mutate
+for i in child_index:
+    mutate_children = mutation_algorithm(number_of_caches, number_of_videos, children[i], randomEP, video_ed_request,
                                          video_size_desc)
     # print("mutate children",mutate_children[0])
 if mutate_children[0] > max(mutation):
@@ -318,13 +302,9 @@ if mutate_children[0] > max(mutation):
     best_generations.append(child)
     best_score.append(mutate_children[0])
 
+best_score += mutation
 
-if best_score!=[] and max(best_score) > max(mutation):
-    print("After trying mutating the children, the best overall score from genetic algorithm:", max(best_score))
-else:
-    print(
-        "Mutating the children for 20 generations didn't provide a better solution compared to the solution produced by the parent.")
-    print("Parent score from genetic algorithm:", max(mutation))
+print("BEST OVERALL SCORE:", max(best_score))
 
 # ************************ TIME *************************````````````````````
 end = time.time()
