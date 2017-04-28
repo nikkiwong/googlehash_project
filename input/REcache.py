@@ -58,7 +58,7 @@ class Cache(object):
         self.videoArray = Set() #this cache uses the Set data structure to store videos
         self.addedVideo = 0
 
-    def add_video_to_cache(self, v, vSize, vReq):
+    def add_video_to_cache(self, v, vSize):
         #only adds videos to the current cache if the video's size that you want to put in the cache is not greater
         #than the remaining size in the cache.
         if self.cacheTotal-vSize > 0:

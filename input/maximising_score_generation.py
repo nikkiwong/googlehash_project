@@ -8,7 +8,7 @@ import copy
 
 start = time.time()
 
-data = read_input.read_google("input/videos_worth_spreading.in")
+data = read_input.read_google("input/me_at_the_zoo.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -33,7 +33,7 @@ def add_video_to_cache(video_ed_request, ed_cache_list, list_cache, video_size_d
         # using the dictionary provided, I iterate through the dictionary.
         for cache in ed_cache_list[int(key[1])]:
             # for each cache that is linked to the current endpoint
-            list_cache[cache].add_video_to_cache(int(key[0]), video_size_desc[int(key[0])], int(value))
+            list_cache[cache].add_video_to_cache(int(key[0]), video_size_desc[int(key[0])])
             # add the current video into to the cache that is linked to the current endpoint.
 
 
@@ -94,7 +94,7 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
 
 
 @jit
-def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
+def RS_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc):
     """this function RANDOMLY adds videos one at a time into the cache!"""
     randomMax = 0
     x = 0
@@ -222,7 +222,7 @@ print("Finished adding video.")
 
 print("Adding video randomly...")
 #adding videos to all the caches at completely random and calculating the score
-RS_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request, video_size_desc)
+RS_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc)
 best_time(video_ed_request, randomCache, randomEP)
 randomMaximum = score(randomEP)
 print("Finished adding video randomly...")
@@ -258,27 +258,32 @@ print("Starting mutation algorithm...")
 count = 0
 entering = 1
 mutation = []
+
 while count < 12:
-    # print("count",count)
+    #generating 12 generations of mutations from the cache list that had random videos added
     mutation_score = mutation_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request,
                                         video_size_desc)
     if randomMaximum <= mutation_score[0]:
         # want to keep the cache matrices that give scores higher than the original cache list.
         parents.append(copy.deepcopy(randomCache))
         mutation.append(mutation_score[0])
-        # storing the best 20 cache lists.
+        # storing the best cache lists.
         count += 1
-        # print("mutation score:", mutation_score[1])
-parents += mutation_score[1]
+
+parents += mutation_score[1] #adding the randomly stored mutated cache lists (from the function call) to the parent list
 print("Finished mutation algorithm...")
 print("best mutation algorithm score:", max(mutation))
 
 # --- Part 2: Evolution ---
+
 print("Time to evolve!")
+#evolving the parents by using the function evolution_time
 children = evolution_time(parents)
 print("Evolution complete")
 best_score = []
 evolutionScore = best_children(children, video_ed_request, randomEP)
+#calculating the score for the children that were evolved from the parents.
+
 if evolutionScore:
     best_score += evolutionScore[2]
     print("Awesome! We have some children with better score than the parent!")
@@ -293,7 +298,6 @@ best_score = []
 while generation < 5:
     # we are generating new children using the previous generations children (up to 5 generations)
     # Let the work of evolution in generations begin
-    # print(len(children))
     children = evolution_time(children)
     child = best_children(children, video_ed_request, randomEP)
     if child:
@@ -314,16 +318,13 @@ print("")
 print("Let's try mutating the children...")
 
 while x < 20:
-    # mutating 20 generation of children
+    # mutating 20 generations of children
     for child in children:
         mutate_children = mutation_algorithm(number_of_caches, number_of_videos, child, randomEP, video_ed_request,
                                              video_size_desc)
-        # print("mutate children",mutate_children[0])
         if mutate_children[0] > max(mutation):
-            # print(x)
             best_generations.append(child)
             best_score.append(mutate_children[0])
-            # print("Better than parent mutation:", mutate_children[0])
     x += 1
 
 if best_score!=[] and max(best_score) > max(mutation):
