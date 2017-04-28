@@ -83,14 +83,15 @@ class Cache(object):
     def get_videoMatrix(self):
         return self.vidMatrix
 
+    # HILL CLIMB
     def hill_climb(self, n, eachVSize):
-        #HILL CLIMB
-        #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
+        """this function adds one video to the cache if there is space and it will remove the previously added video"""
         if self.cacheTotal-eachVSize > 0:
             if self.vidMatrix[n] == True:
                 return False
             else:
                 if self.addedVideo!=0:
+                    #this is just for the initial run because addedVideo has not been assigned the value of n yet.
                     self.vidMatrix[self.addedVideo] = False
                 #reverting the last added video back to original because in hill climb you only change one!
                 self.vidMatrix[n] = True
@@ -98,23 +99,20 @@ class Cache(object):
                 self.addedVideo = n
                 return True
 
-    def get_cache_size(self):
-        return self.cacheTotal
-
+    # RANDOM SEARCH
     def random_search(self, n, eachVSize):
-        #RANDOM SEARCH
-        #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
+        """this function is to only add videos that have been passed through the function if the video doesn't already exist
+        and if there is space in the cache"""
         if self.cacheTotal-eachVSize > 0:
             if self.vidMatrix[n] != True:
                 self.vidMatrix[n] = True
                 self.cacheTotal -= eachVSize
 
+    # GENETIC ALGORITHM
     def mutate_solution(self, n, eachVSize):
-
-        #HILL CLIMB
-        #only adds videos if the video's size that you want to put in the cache is not greater than the remaining size in the cache
+        """this function removes the video from the cache if its already there, if not then it will add it in the cache
+        if there is enough space for it"""
         if self.vidMatrix[n] == True:
-            #just to randomize it, only change true to false if the video number is divisible by 3
             self.vidMatrix[n] = False
             self.cacheTotal += eachVSize
             return False

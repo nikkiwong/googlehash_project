@@ -8,7 +8,7 @@ import copy
 
 start = time.time()
 
-data = read_input.read_google("input/me_at_the_zoo.in")
+data = read_input.read_google("input/videos_worth_spreading.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]

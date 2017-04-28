@@ -8,7 +8,7 @@ import copy
 
 start = time.time()
 
-data = read_input.read_google("input/videos_worth_spreading.in")
+data = read_input.read_google("input/me_at_the_zoo.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -95,11 +95,12 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
 
 @jit
 def RS_algorithm(number_of_caches, number_of_videos, list_cache, list_endpoint, video_ed_request, video_size_desc):
-    """this function RANDOMLY adds videos one at a time into the cache!"""
+    """this function RANDOMLY adds videos one at a time into half of the caches in the cache list!"""
     randomMax = 0
     x = 0
-    for cacheNum in range(0, number_of_caches//2):
-        #iterate through all the cache one at a time!
+    cacheIndex = sample(range(0, number_of_caches), number_of_caches // 2)
+    for cacheNum in cacheIndex:
+        #iterate through the first half of the cache one at a time!
         while x < (number_of_videos) * 100:
             #we will add x amount of random videos to the cache
             n = randint(0, number_of_videos - 1)
@@ -125,6 +126,12 @@ def mutation_algorithm(number_of_caches, number_of_videos, list_cache, list_endp
     #repeats this process 10 times
         print("cache index number", cacheNum)
         n = randint(0, number_of_videos - 1)
+        if n % 3 == 0:
+            #this is an example of using simulated annealing, because for any randomly generated video number
+            #that is divisible by 3 I will store into my parent list. These cache list stored could be the worst
+            #or they could be the best matrices from all the solution. The thing is that I don't know.
+            print("n", n)
+            parents.append(copy.deepcopy(list_cache))
         # print("n:",n)
         #chose random video number from 0 to the number of videos that are give from the file.
         if list_cache[cacheNum].mutate_solution(n, video_size_desc[n]):
@@ -303,6 +310,7 @@ if child:
 print("Starting mutation of children")
 # if there are no better solutions from the generation of children, then lets mutate some of them!
 child_index = sample(range(0, len(children)), 4)
+print("length of child index:",len(child_index))
 #choose 4 random lists of these children lists to mutate
 for i in child_index:
     print("i",i)
