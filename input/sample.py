@@ -8,7 +8,7 @@ import copy
 
 start = time.time()
 
-data = read_input.read_google("input/me_at_the_zoo.in")
+data = read_input.read_google("input/kittens.in")
 
 number_of_requests = data["number_of_requests"]
 number_of_caches = data["number_of_caches"]
@@ -72,6 +72,8 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
     for cache in range(0, number_of_caches):
     #iterate through the caches one at a time
         for video in range(0, number_of_videos):
+            print("cache number", cache)
+            print("hc vid count:", video)
         #iterate through all the videos one at a time
             if list_cache[cache].hill_climb(video, video_size_desc[video]):
             #if the video is successfully added then the above function returns true
@@ -83,7 +85,6 @@ def HC_algorithm(number_of_caches, number_of_videos, list_cache, video_size_desc
                     maximum = new_score
                     parent.append(copy.deepcopy(list_cache))
                     #add this cache list to the parent list
-
     parent_index = sample(range(len(parent) // 2, len(parent)), 4)
     #now we want to randomly select 4 of the cache lists we stored in the parent list earlier.
     # We only choose from the last half of the list because those would be the best 50% of the scores as the best ones were always appended to the end of the parent list.
@@ -116,11 +117,18 @@ def mutation_algorithm(number_of_caches, number_of_videos, list_cache, list_endp
     """this function generates mutations in each cache"""
     mutate_Max = 0
     parents = []
+    if number_of_caches>100:
+        cacheIndex = sample(range(0, number_of_caches), number_of_caches // 40)
+    elif number_of_caches>30:
+        cacheIndex = sample(range(0, number_of_caches), number_of_caches // 30)
+    else:
+        cacheIndex = sample(range(0, number_of_caches), number_of_caches // 2)
 
-    cacheIndex = sample(range(0, number_of_caches), number_of_caches//3)
+    print("MUT cache index:",cacheIndex)
     #using this so that there are no duplicate random selection of caches
     #selecing random caches to put videos into.
     for cacheNum in cacheIndex:
+        print("MUT cachenumber", cacheNum)
     #iterates through the caches randomly adding a random video for that random cache selected
         n = randint(0, number_of_videos - 1)
         # chose random video number from 0 to the number of videos that are give from the file.
@@ -144,6 +152,8 @@ def evolution_time(parents):
     """this function evolves the solutions, from parent to child, create a new generation of cache lists"""
     children = []
     while len(children) <= len(parents):
+        print("length of parents:", len(parents))
+        print("length of children:", len(children))
         # making the same number of children as there are parents
         A = randint(0, len(parents) - 1)
         B = randint(0, len(parents) - 1)
@@ -167,6 +177,8 @@ def best_children(children, video_ed_request, list_endpoint):
     best_new_score = []
     new_children = []
     for child in children:
+        print("child", child)
+        print("children", children)
         #iterating through the children and calculating their scores
         best_time(video_ed_request, child, list_endpoint)
         child_score = score(list_endpoint)
@@ -204,7 +216,8 @@ originalEP = copy.deepcopy(list_endpoint)
 originalCache = copy.deepcopy(list_cache)
 randomEP = copy.deepcopy(list_endpoint)
 randomCache = copy.deepcopy(list_cache)
-
+print("kittens without hc")
+print("adding videos")
 
 #adding videos to the cache in an orderly fashion in terms of iterating through the dictionary and calculating the score
 add_video_to_cache(video_ed_request, ed_cache_list, originalCache, video_size_desc)
@@ -224,15 +237,15 @@ best_score.append(randomMaximum)
 
 
 parents = []
-
-#computing the hill climb algorithm on the cache lists that had videos randomly put in
-hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request,
-                              randomEP)
-if originalMaximum < hillClimbScore[0]:
-    randomMaximum = hillClimbScore[0]
-
-# storing the local best solutions
-parents += hillClimbScore[1]
+# print("hill climb")
+# #computing the hill climb algorithm on the cache lists that had videos randomly put in
+# hillClimbScore = HC_algorithm(number_of_caches, number_of_videos, randomCache, video_size_desc, video_ed_request,
+#                               randomEP)
+# if originalMaximum < hillClimbScore[0]:
+#     randomMaximum = hillClimbScore[0]
+#
+# # storing the local best solutions
+# parents += hillClimbScore[1]
 
 
 # ************** GENETIC ALGORITHM *************************
@@ -242,7 +255,7 @@ parents += hillClimbScore[1]
 count = 0
 entering = 1
 mutation = []
-
+print("mutation")
 mutation_score = mutation_algorithm(number_of_caches, number_of_videos, randomCache, randomEP, video_ed_request,
                                     video_size_desc)
 mutation.append(mutation_score[0])
@@ -252,18 +265,25 @@ parents += mutation_score[1]
 
 
 # --- Part 2: Evolution ---
-
+print("evolution parents")
 #here I am randomly selecting a third of caches from the list of cache lists from parents
-parents_index = sample(range(0, len(parents)), len(parents)//3)
+if len(parents)>100:
+    parents_index = sample(range(0, len(parents)), len(parents)//40)
+elif len(parents)>30:
+    parents_index = sample(range(0, len(parents)), len(parents)//30)
+else:
+    parents_index = sample(range(0, len(parents)), len(parents) // 2)
 
 
 randomParents = []
 for i in parents_index:
     randomParents.append(parents[i])
 #evolving the randomly selected parents
+print("evolution parents")
 children = evolution_time(randomParents)
 
 #calculating the score from the children generated by the evolution of parents
+print("evolution score")
 evolutionScore = best_children(children, video_ed_request, randomEP)
 if evolutionScore:
     best_score += evolutionScore[2]
@@ -271,7 +291,7 @@ if evolutionScore:
 generation = 0
 best_generations = []
 
-
+print("evolution children")
 #evolving the children generated by the parents (further evolution)
 children = evolution_time(children)
 child = best_children(children, video_ed_request, randomEP)
@@ -283,7 +303,7 @@ if child:
 
 # if there are no better solutions from the generation of children, then lets mutate some of them!
 child_index = sample(range(0, len(children)), 4)
-
+print("mutating children")
 #choose 4 random lists of these children lists to mutate
 for i in child_index:
     mutate_children = mutation_algorithm(number_of_caches, number_of_videos, children[i], randomEP, video_ed_request,
@@ -299,4 +319,10 @@ print("BEST OVERALL SCORE:", max(best_score))
 
 # ************************ TIME *************************````````````````````
 end = time.time()
-print("time taken:", end - start)
+timeTaken = (end - start)/60
+if timeTaken>60:
+    hours = timeTaken//60
+    minutes = timeTaken%60
+    print("time taken:", hours, "hours and", minutes, "minutes.")
+else:
+    print("time taken:", timeTaken, "minutes")
